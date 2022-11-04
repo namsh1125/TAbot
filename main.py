@@ -4,6 +4,7 @@ import sys
 import numpy as np
 
 from utils import *
+from datetime import datetime
 import time
 import cv2
 from threading import Thread
@@ -14,8 +15,9 @@ recorder = 0
 def videoRecorder():
     height, width, _ = frame_read.frame.shape
 
-    # Todo: video 이름 변경
-    video = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+    today = datetime.today().strftime("%m%d-%H%M%S")  # 촬영하기 시작한 시간으로 파일 이름 셋팅
+    video_name = today + '.avi'
+    video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
 
     while keepRecording:
         video.write(frame_read.frame)
@@ -51,19 +53,22 @@ if __name__ == "__main__":
 
         # Class recording
         if keyboard & 0xFF == ord('v'):
+
+            # Todo: 비디오 추가 촬영이 가능하게
+
             recorder = Thread(target=videoRecorder)
             recorder.start()
 
             # Todo: 키보드 조작으로 녹화 종료하게
 
-            myDrone.move_up(100)
-            myDrone.rotate_counter_clockwise(360)
+            myDrone.move_up(50)
+            myDrone.rotate_counter_clockwise(90)
             myDrone.move_down(50)
-            myDrone.rotate_counter_clockwise(360)
-            myDrone.move_up(100)
-            myDrone.rotate_counter_clockwise(360)
+            myDrone.rotate_counter_clockwise(90)
+            myDrone.move_up(50)
+            myDrone.rotate_counter_clockwise(90)
             myDrone.move_down(50)
-            myDrone.rotate_counter_clockwise(360)
+            myDrone.rotate_counter_clockwise(90)
 
             keepRecording = False
             recorder.join()
