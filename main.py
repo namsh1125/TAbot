@@ -11,6 +11,17 @@ from threading import Thread
 keepRecording = True
 recorder = 0
 
+def videoRecorder():
+    height, width, _ = frame_read.frame.shape
+
+    # Todo: video 이름 변경
+    video = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+
+    while keepRecording:
+        video.write(frame_read.frame)
+        time.sleep(1 / 30)
+
+    video.release()
 
 if __name__ == "__main__":
 
@@ -22,7 +33,7 @@ if __name__ == "__main__":
     frame_read = myDrone.get_frame_read()
     time.sleep(1)
 
-    # Todo: keyboard to gesture
+    # Todo: 키보드 입력을 제스처로 변경
     while True:
         img = frame_read.frame
         cv2.imshow("drone", img)
@@ -38,18 +49,27 @@ if __name__ == "__main__":
             exit(0)
             break
 
-        # Todo: fix video record
-        # if keyboard & 0xFF == ord('v'):
-        #
-        #     height, width, _ = frame_read.frame_shape
-        #     video = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'DIVX'), 30, (width, height))  # Todo: 수업 & 수업날짜로 이름 변경
-        #
-        #     while keepRecording:
-        #         video.write(frame_read.frame)
-        #         time.sleep(1 / 30)
-        #         video.release()
+        # Class recording
+        if keyboard & 0xFF == ord('v'):
+            recorder = Thread(target=videoRecorder)
+            recorder.start()
 
-        if keyboard & 0xFF == ord('c'):  # Capture student
+            # Todo: 키보드 조작으로 녹화 종료하게
+
+            myDrone.move_up(100)
+            myDrone.rotate_counter_clockwise(360)
+            myDrone.move_down(50)
+            myDrone.rotate_counter_clockwise(360)
+            myDrone.move_up(100)
+            myDrone.rotate_counter_clockwise(360)
+            myDrone.move_down(50)
+            myDrone.rotate_counter_clockwise(360)
+
+            keepRecording = False
+            recorder.join()
+
+        # Capture student
+        if keyboard & 0xFF == ord('c'):
             text = 'panorama'
 
             myDrone.rotate_clockwise(30)
