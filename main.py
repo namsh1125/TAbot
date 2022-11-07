@@ -1,6 +1,7 @@
 # 201735812 김민수, 201835834 남승현
+import os
 import sys
-
+import face_recognition
 import numpy as np
 
 from utils import *
@@ -11,6 +12,48 @@ from threading import Thread
 
 keepRecording = True
 recorder = 0
+
+# make a list of all the available images
+images = os.listdir('images')
+print(images)
+
+#Take image  -  Frame Read
+
+
+def img_name(image_File):
+    image_name = []
+    name = image_File.split('.')[0]
+    image_name.append(name)
+    return image_name
+
+
+
+# def check_att(img):
+#     # load your image - 'file type' in here - need to change
+#     image_to_be_matched = face_recognition.load_image_file(img)
+#
+#     # encoded the loaded image into a feature vector
+#     image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]
+#
+#     # iterate over each image
+#     for image in images:
+#         # load the image
+#         current_image = face_recognition.load_image_file("images/" + image)
+#         # encode the loaded image into a feature vector
+#         current_image_encoded = face_recognition.face_encodings(current_image)[0]
+#         # match your image with the image and check if it matches
+#         result = face_recognition.compare_faces(
+#             [image_to_be_matched_encoded], current_image_encoded)
+#         # check if it was a match
+#         if result[0] == True:
+#            # print("Matched: " + image)
+#             print(img_name(image),  'is here')
+#         #else:
+#          #   print("Not matched: " + image)
+
+
+#check_att(image)
+
 
 def videoRecorder():
     height, width, _ = frame_read.frame.shape
@@ -28,7 +71,7 @@ def videoRecorder():
 if __name__ == "__main__":
 
     myDrone = initTello()
-    myDrone.takeoff()
+  #  myDrone.takeoff()
     time.sleep(1)
     myDrone.streamon()
     cv2.namedWindow("drone")
@@ -72,6 +115,36 @@ if __name__ == "__main__":
 
             keepRecording = False
             recorder.join()
+
+        if keyboard & 0xFF == ord('a'):
+
+            image = myDrone.get_frame_read().frame
+
+            # load your image - 'file type' in here - need to change
+            image_to_be_matched = face_recognition.load_image_file(img)
+
+            # encoded the loaded image into a feature vector
+            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]
+
+            # iterate over each image
+            for image in images:
+
+                current_image = face_recognition.load_image_file("images/" + image) # load the image
+                current_image_encoded = face_recognition.face_encodings(current_image)[0] # encode the loaded image into a feature vector
+                result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # match your image with the image and check if it matches
+
+                # check if it was a match
+                if result[0] == True:
+                    # print("Matched: " + image)
+                    print(img_name(image), 'is here')
+                # else:
+                #   print("Not matched: " + image)
+
+
+
+
+
+
 
         # Capture student
         if keyboard & 0xFF == ord('c'):
