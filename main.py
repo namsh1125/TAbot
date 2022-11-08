@@ -13,46 +13,12 @@ from threading import Thread
 keepRecording = True
 recorder = 0
 
-# make a list of all the available images
-images = os.listdir('images')
-print(images)
-
-#Take image  -  Frame Read
-
 
 def img_name(image_File):
     image_name = []
     name = image_File.split('.')[0]
     image_name.append(name)
     return image_name
-
-
-
-# def check_att(img):
-#     # load your image - 'file type' in here - need to change
-#     image_to_be_matched = face_recognition.load_image_file(img)
-#
-#     # encoded the loaded image into a feature vector
-#     image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]
-#
-#     # iterate over each image
-#     for image in images:
-#         # load the image
-#         current_image = face_recognition.load_image_file("images/" + image)
-#         # encode the loaded image into a feature vector
-#         current_image_encoded = face_recognition.face_encodings(current_image)[0]
-#         # match your image with the image and check if it matches
-#         result = face_recognition.compare_faces(
-#             [image_to_be_matched_encoded], current_image_encoded)
-#         # check if it was a match
-#         if result[0] == True:
-#            # print("Matched: " + image)
-#             print(img_name(image),  'is here')
-#         #else:
-#          #   print("Not matched: " + image)
-
-
-#check_att(image)
 
 
 def videoRecorder():
@@ -118,35 +84,29 @@ if __name__ == "__main__":
 
         if keyboard & 0xFF == ord('a'):
 
-            image = myDrone.get_frame_read().frame
+            images = os.listdir('images') # 폴더에 저장된 학생들의 사진을 불러옴
 
-            # load your image - 'file type' in here - need to change
-            image_to_be_matched = face_recognition.load_image_file(img)
+            image = myDrone.get_frame_read().frame # 출석체크를 하기 위해 학생들이 있는 교실 촬영
 
-            # encoded the loaded image into a feature vector
-            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]
+            # FixMe: 아래 명령어가 어떤 명령인지 주석좀...ㅎ
+            image_to_be_matched = face_recognition.load_image_file(img) # load your image - 'file type' in here - need to change
 
-            # iterate over each image
+            # FixMe: 아래 명령어가 어떤 명령인지 주석좀...ㅎ
+            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] # encoded the loaded image into a feature vector
+
+            # 모든 학생들에 대해 찍힌 사진 비교
             for image in images:
 
                 current_image = face_recognition.load_image_file("images/" + image) # load the image
+
                 current_image_encoded = face_recognition.face_encodings(current_image)[0] # encode the loaded image into a feature vector
-                result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # match your image with the image and check if it matches
 
-                # check if it was a match
-                if result[0] == True:
-                    # print("Matched: " + image)
+                result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # 저장된 학생이 교실 사진에 있는지 없는지 확인
+
+                if result[0] == True: # 찍은 교실 사진에 저장된 학생이 있다면
                     print(img_name(image), 'is here')
-                # else:
-                #   print("Not matched: " + image)
 
-
-
-
-
-
-
-        # Capture student
+        # 파노라마 사진 찍기
         if keyboard & 0xFF == ord('c'):
             text = 'panorama'
 
