@@ -1,6 +1,7 @@
 # 201735812 김민수, 201835834 남승현
+import os
 import sys
-
+import face_recognition
 import numpy as np
 
 from utils import *
@@ -11,6 +12,14 @@ from threading import Thread
 
 keepRecording = True
 recorder = 0
+
+
+def img_name(image_File):
+    image_name = []
+    name = image_File.split('.')[0]
+    image_name.append(name)
+    return image_name
+
 
 def videoRecorder():
     height, width, _ = frame_read.frame.shape
@@ -28,7 +37,7 @@ def videoRecorder():
 if __name__ == "__main__":
 
     myDrone = initTello()
-    myDrone.takeoff()
+  #  myDrone.takeoff()
     time.sleep(1)
     myDrone.streamon()
     cv2.namedWindow("drone")
@@ -73,7 +82,32 @@ if __name__ == "__main__":
             keepRecording = False
             recorder.join()
 
-        # Capture student
+        if keyboard & 0xFF == ord('a'):
+
+            images = os.listdir('images') # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
+            print(images)
+
+            image = myDrone.get_frame_read().frame # 출석체크를 하기 위해 학생들이 있는 교실 촬영
+            class_image = np.array(image)
+            cv2.imwrite('class_image.jpg', class_image)
+
+            image_to_be_matched = face_recognition.load_image_file('class_image.jpg') # 사진에서 얼굴추출하기
+
+            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] #로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
+
+            # 모든 학생들에 대해 찍힌 사진 비교
+            for image in images:
+
+                current_image = face_recognition.load_image_file("images/" + image) # load the image
+
+                current_image_encoded = face_recognition.face_encodings(current_image)[0] #파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
+
+                result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # 저장된 학생이 교실 사진에 있는지 없는지 확인
+
+                if result[0] == True: # 찍은 교실 사진에 저장된 학생이 있다면
+                    print(img_name(image), 'is here')
+
+        # 파노라마 사진 찍기
         if keyboard & 0xFF == ord('c'):
             text = 'panorama'
 
