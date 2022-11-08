@@ -84,22 +84,23 @@ if __name__ == "__main__":
 
         if keyboard & 0xFF == ord('a'):
 
-            images = os.listdir('images') # 폴더에 저장된 학생들의 사진을 불러옴
+            images = os.listdir('images') # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
+            print(images)
 
             image = myDrone.get_frame_read().frame # 출석체크를 하기 위해 학생들이 있는 교실 촬영
+            class_image = np.array(image)
+            cv2.imwrite('class_image.jpg', class_image)
 
-            # FixMe: 아래 명령어가 어떤 명령인지 주석좀...ㅎ
-            image_to_be_matched = face_recognition.load_image_file(img) # load your image - 'file type' in here - need to change
+            image_to_be_matched = face_recognition.load_image_file('class_image.jpg') # 사진에서 얼굴추출하기
 
-            # FixMe: 아래 명령어가 어떤 명령인지 주석좀...ㅎ
-            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] # encoded the loaded image into a feature vector
+            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] #로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
 
             # 모든 학생들에 대해 찍힌 사진 비교
             for image in images:
 
                 current_image = face_recognition.load_image_file("images/" + image) # load the image
 
-                current_image_encoded = face_recognition.face_encodings(current_image)[0] # encode the loaded image into a feature vector
+                current_image_encoded = face_recognition.face_encodings(current_image)[0] #파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
 
                 result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # 저장된 학생이 교실 사진에 있는지 없는지 확인
 
