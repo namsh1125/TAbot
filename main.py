@@ -60,7 +60,7 @@ if __name__ == "__main__":
             exit(0)
             break
 
-        # Class recording
+        # 수업 녹화
         if keyboard & 0xFF == ord('v'):
 
             # Todo: 비디오 추가 촬영이 가능하게
@@ -84,27 +84,42 @@ if __name__ == "__main__":
 
         if keyboard & 0xFF == ord('a'):
 
-            images = os.listdir('images') # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
-            print(images)
+            # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
+            images = os.listdir('images')
 
-            image = myDrone.get_frame_read().frame # 출석체크를 하기 위해 학생들이 있는 교실 촬영
-            class_image = np.array(image)
-            cv2.imwrite('class_image.jpg', class_image)
+            # 출석체크를 하기 위해 학생들이 있는 교실 촬영
+            image = myDrone.get_frame_read().frame
+            cv2.imwrite('class_image1.jpg', image)
 
-            image_to_be_matched = face_recognition.load_image_file('class_image.jpg') # 사진에서 얼굴추출하기
+            # 앞으로 드론 이동해서 멀리 있는 학생 촬영
+            myDrone.move_forward(50)
 
-            image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] #로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
+            # 출석체크를 하기 위해 학생들이 있는 교실 촬영
+            image = myDrone.get_frame_read().frame
+            cv2.imwrite('class_image2.jpg', image)
+
+            # 사진에서 얼굴추출하기
+            image1_to_be_matched = face_recognition.load_image_file('class_image1.jpg')
+            image2_to_be_matched = face_recognition.load_image_file('class_image2.jpg')
+
+            # 로드된 이미지에서 특징 추출하기
+            image1_to_be_matched_encoded = face_recognition.face_encodings(image1_to_be_matched)[0]
+            image2_to_be_matched_encoded = face_recognition.face_encodings(image2_to_be_matched)[0]
 
             # 모든 학생들에 대해 찍힌 사진 비교
             for image in images:
 
-                current_image = face_recognition.load_image_file("images/" + image) # load the image
+                # load the image
+                current_image = face_recognition.load_image_file("images/" + image)
 
-                current_image_encoded = face_recognition.face_encodings(current_image)[0] #파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
+                # 파일에서 가져온 이미지에서 얼굴 특징 추출하기
+                current_image_encoded = face_recognition.face_encodings(current_image)[0]
 
-                result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # 저장된 학생이 교실 사진에 있는지 없는지 확인
+                # 저장된 학생이 교실 사진에 있는지 없는지 확인
+                result = face_recognition.compare_faces([image1_to_be_matched_encoded], current_image_encoded) or face_recognition.compare_faces([image2_to_be_matched_encoded], current_image_encoded)
 
-                if result[0] == True: # 찍은 교실 사진에 저장된 학생이 있다면
+                # 찍은 교실 사진에 저장된 학생이 있다면
+                if result[0] == True:
                     print(img_name(image), 'is here')
 
         # 파노라마 사진 찍기
