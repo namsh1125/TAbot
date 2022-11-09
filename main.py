@@ -1,9 +1,16 @@
+# import os
+# import face_recognition
+# import numpy as np
+
+from datetime import datetime
+# from threading import Thread
 import sys
 import time
 import cv2
 import mediapipe as mp
 import numpy as np
 from utils import *
+
 max_num_hands = 2
 drone_gesture = {0: 'up', 1: 'left', 3: 'forward', 4: 'back', 5: 'down', 9: 'right', 10: 'camera'}
 
@@ -20,20 +27,47 @@ hands = mp_hands.Hands(
 
 # Gesture recognition model
 file = np.genfromtxt('gesture_train.csv', delimiter=',')
-angle = file[:,:-1].astype(np.float32)
+angle = file[:, :-1].astype(np.float32)
 label = file[:, -1].astype(np.float32)
 knn = cv2.ml.KNearest_create()
 knn.train(angle, cv2.ml.ROW_SAMPLE, label)
 
 
+def img_name(image_File):
+    image_name = []
+    name = image_File.split('.')[0]
+    image_name.append(name)
+    return image_name
+
+
+def videoRecorder():
+    height, width, _ = frame_read.frame.shape
+
+    today = datetime.today().strftime("%m%d-%H%M%S")  # 촬영하기 시작한 시간으로 파일 이름 셋팅
+    video_name = today + '.avi'
+    video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+
+    while keepRecording:
+        video.write(frame_read.frame)
+        time.sleep(1 / 30)
+
+    video.release()
+
+
 while True:
-    img = myDrone.get_frame_read().frame
+
+    myDrone = initTello()
+    # myDrone.takeoff()
+    myDrone.streamon()
+    cv2.namedWindow("drone")
+    frame_read = myDrone.get_frame_read()
+
+    img = frame_read.frame
 
     img = cv2.flip(img, 1)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     result = hands.process(img)
-
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     if result.multi_hand_landmarks is not None:
@@ -45,18 +79,19 @@ while True:
                 joint[j] = [lm.x, lm.y, lm.z]
 
             # Compute angles between joints
-            v1 = joint[[0,1,2,3,0,5,6,7,0,9,10,11,0,13,14,15,0,17,18,19],:] # Parent joint
-            v2 = joint[[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],:] # Child joint
-            v = v2 - v1 # [20,3]
+            v1 = joint[[0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19], :]  # Parent joint
+            v2 = joint[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20], :]  # Child joint
+            v = v2 - v1  # [20,3]
+
             # Normalize v
             v = v / np.linalg.norm(v, axis=1)[:, np.newaxis]
 
             # Get angle using arcos of dot product
             angle = np.arccos(np.einsum('nt,nt->n',
-                v[[0,1,2,4,5,6,8,9,10,12,13,14,16,17,18],:],
-                v[[1,2,3,5,6,7,9,10,11,13,14,15,17,18,19],:])) # [15,]
+                                        v[[0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 16, 17, 18], :],
+                                        v[[1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19], :]))  # [15,]
 
-            angle = np.degrees(angle) # Convert radian to degree
+            angle = np.degrees(angle)  # Convert radian to degree
 
             # Inference gesture
             data = np.array([angle], dtype=np.float32)
@@ -175,114 +210,3 @@ while True:
 
         if cv2.waitKey(1) == ord('q'):
             break
-
-
-# # 201735812 김민수, 201835834 남승현
-# import os
-# import sys
-# import face_recognition
-# import numpy as np
-#
-# from utils import *
-# from datetime import datetime
-# import time
-# import cv2
-# from threading import Thread
-#
-# keepRecording = True
-# recorder = 0
-#
-#
-# def img_name(image_File):
-#     image_name = []
-#     name = image_File.split('.')[0]
-#     image_name.append(name)
-#     return image_name
-#
-#
-# def videoRecorder():
-#     height, width, _ = frame_read.frame.shape
-#
-#     today = datetime.today().strftime("%m%d-%H%M%S")  # 촬영하기 시작한 시간으로 파일 이름 셋팅
-#     video_name = today + '.avi'
-#     video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
-#
-#     while keepRecording:
-#         video.write(frame_read.frame)
-#         time.sleep(1 / 30)
-#
-#     video.release()
-#
-# if __name__ == "__main__":
-#
-#     myDrone = initTello()
-#   #  myDrone.takeoff()
-#     time.sleep(1)
-#     myDrone.streamon()
-#     cv2.namedWindow("drone")
-#     frame_read = myDrone.get_frame_read()
-#     time.sleep(1)
-#
-#     # Todo: 키보드 입력을 제스처로 변경
-#     while True:
-#         img = frame_read.frame
-#         cv2.imshow("drone", img)
-#
-#         keyboard = cv2.waitKey(1)
-#
-#         if keyboard & 0xFF == ord('q'):
-#             myDrone.land()
-#             frame_read.stop()
-#             myDrone.streamoff()
-#             keepRecording = False
-#             recorder.join()
-#             exit(0)
-#             break
-#
-#         # Class recording
-#         if keyboard & 0xFF == ord('v'):
-#
-#             # Todo: 비디오 추가 촬영이 가능하게
-#
-#             recorder = Thread(target=videoRecorder)
-#             recorder.start()
-#
-#             # Todo: 키보드 조작으로 녹화 종료하게
-#
-#             myDrone.move_up(50)
-#             myDrone.rotate_counter_clockwise(90)
-#             myDrone.move_down(50)
-#             myDrone.rotate_counter_clockwise(90)
-#             myDrone.move_up(50)
-#             myDrone.rotate_counter_clockwise(90)
-#             myDrone.move_down(50)
-#             myDrone.rotate_counter_clockwise(90)
-#
-#             keepRecording = False
-#             recorder.join()
-#
-#         if keyboard & 0xFF == ord('a'):
-#
-#             images = os.listdir('images') # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
-#             print(images)
-#
-#             image = myDrone.get_frame_read().frame # 출석체크를 하기 위해 학생들이 있는 교실 촬영
-#             class_image = np.array(image)
-#             cv2.imwrite('class_image.jpg', class_image)
-#
-#             image_to_be_matched = face_recognition.load_image_file('class_image.jpg') # 사진에서 얼굴추출하기
-#
-#             image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0] #로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
-#
-#             # 모든 학생들에 대해 찍힌 사진 비교
-#             for image in images:
-#
-#                 current_image = face_recognition.load_image_file("images/" + image) # load the image
-#
-#                 current_image_encoded = face_recognition.face_encodings(current_image)[0] #파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
-#
-#                 result = face_recognition.compare_faces([image_to_be_matched_encoded], current_image_encoded) # 저장된 학생이 교실 사진에 있는지 없는지 확인
-#
-#                 if result[0] == True: # 찍은 교실 사진에 저장된 학생이 있다면
-#                     print(img_name(image), 'is here')
-#
