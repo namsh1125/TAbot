@@ -13,7 +13,7 @@ from threading import Thread
 
 myDrone = initTello()
 
-#myDrone.takeoff()
+myDrone.takeoff()
 keepRecording = True
 myDrone.streamon()
 frame_read = myDrone.get_frame_read()
@@ -47,7 +47,6 @@ def videoRecorder():
 
     video.release()
 #Ready moving
-#myDrone.move_forward(10)
 
 
 
@@ -74,6 +73,7 @@ with mp_hands.Hands(
         if not results.multi_hand_landmarks:
             # 동작 여부 확인 후 7초뒤에 내려가기
             print("No Gesture is detected")
+            time.sleep(1)
         elif results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
 
@@ -138,11 +138,12 @@ with mp_hands.Hands(
                         keepRecording = False
                         recorder.join()
                         record_state = False
+                        print("Recoed Saved")
                         continue
                 elif thumb_finger_state == 1 and index_finger_state == 1 and middle_finger_state == 1 and ring_finger_state == 1 and pinky_finger_state == 1:
                     # text = "보"
                     text = 'panorama'
-
+                    print("Panorama")
                     myDrone.rotate_clockwise(30)
                     image = myDrone.get_frame_read().frame
                     image = np.array(image)
@@ -201,6 +202,7 @@ with mp_hands.Hands(
                     record_state = True
                     recorder = Thread(target=videoRecorder)
                     recorder.start()
+                    print("Record Start!")
                     myDrone.move_up(50)
                     myDrone.rotate_counter_clockwise(180)
                     # myDrone.move_down(50)
@@ -211,7 +213,7 @@ with mp_hands.Hands(
                     # myDrone.rotate_counter_clockwise(90)
                 if index_finger_state == 0 and middle_finger_state == 0 and ring_finger_state == 0 and pinky_finger_state == 0:
                     # text = "주먹" 출석체크
-
+                    print("Att")
                     images = os.listdir('images')  # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
                     print(images)
 
@@ -224,40 +226,17 @@ with mp_hands.Hands(
                     cv2.imwrite('class_image.jpg', class_image)
 
                     image_to_be_matched = face_recognition.load_image_file('class_image.jpg')  # 사진에서 얼굴추출하기
-                    image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[
-                        0]  # 로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
+                    image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]  # 로드된 이미지에서 특징 추출하기   # encoded the loaded image into a feature vector
 
                     # 모든 학생들에 대해 찍힌 사진 비교
                     for image in images:
                         current_image = face_recognition.load_image_file("images/" + image)  # load the image
-                        current_image_encoded = face_recognition.face_encodings(current_image)[
-                            0]  # 파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
-                        result = face_recognition.compare_faces([image_to_be_matched_encoded],
-                                                                current_image_encoded)  # 저장된 학생이 교실 사진에 있는지 없는지 확인
+                        current_image_encoded = face_recognition.face_encodings(current_image)[0]  # 파일에서 가져온 이미지에서 얼굴 특징 추출하기     # encode the loaded image into a feature vector
+                        result = face_recognition.compare_faces([image_to_be_matched_encoded],current_image_encoded)  # 저장된 학생이 교실 사진에 있는지 없는지 확인
 
                         if result[0] == True:  # 찍은 교실 사진에 저장된 학생이 있다면
                             print(img_name(image), 'is here')
 
-
-
-                w, h = font.getsize(text)
-
-                x = 50
-                y = 50
-
-                draw.rectangle((x, y, x + w, y + h), fill='black')
-                draw.text((x, y), text, font=font, fill=(255, 255, 255))
-                image = np.array(image)
-
-                # 손가락 뼈대를 그려줍니다.
-                mp_drawing.draw_landmarks(
-                    image,
-                    hand_landmarks,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
-
-        cv2.imshow('MediaPipe Hands', image)
 
         if cv2.waitKey(5) & 0xFF == 27:
             break
