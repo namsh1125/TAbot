@@ -73,7 +73,7 @@ with mp_hands.Hands(
         image_height, image_width, _ = image.shape
         if not results.multi_hand_landmarks:
             # 동작 여부 확인 후 7초뒤에 내려가기
-            print(1)
+            print("No Gesture is detected")
         elif results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
 
@@ -128,6 +128,8 @@ with mp_hands.Hands(
                 image = Image.fromarray(image)
                 draw = ImageDraw.Draw(image)
 
+
+                #제스처 액션
                 text = ""
                 if record_state:
                     if thumb_finger_state == 1 and index_finger_state == 1 and middle_finger_state == 1 and ring_finger_state == 0 and pinky_finger_state == 0:
@@ -200,14 +202,13 @@ with mp_hands.Hands(
                     recorder = Thread(target=videoRecorder)
                     recorder.start()
                     myDrone.move_up(50)
-                    myDrone.rotate_counter_clockwise(360)
+                    myDrone.rotate_counter_clockwise(180)
                     # myDrone.move_down(50)
                     # myDrone.rotate_counter_clockwise(90)
                     # myDrone.move_up(50)
                     # myDrone.rotate_counter_clockwise(90)
                     # myDrone.move_down(50)
                     # myDrone.rotate_counter_clockwise(90)
-
                 if index_finger_state == 0 and middle_finger_state == 0 and ring_finger_state == 0 and pinky_finger_state == 0:
                     # text = "주먹" 출석체크
 
@@ -215,8 +216,8 @@ with mp_hands.Hands(
                     print(images)
 
                     # myDrone.rotate_counter_clockwise(360)
-                    time.sleep(3)
                     print("3초있다가 사진찍어욧")
+                    time.sleep(3)
 
                     image = myDrone.get_frame_read().frame
                     class_image = np.array(image)
@@ -236,6 +237,8 @@ with mp_hands.Hands(
 
                         if result[0] == True:  # 찍은 교실 사진에 저장된 학생이 있다면
                             print(img_name(image), 'is here')
+
+
 
                 w, h = font.getsize(text)
 
