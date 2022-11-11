@@ -6,9 +6,7 @@ import time
 import os
 import sys
 import face_recognition
-# from utils import initTello
 from utils import *
-from datetime import datetime
 from threading import Thread
 
 myDrone = initTello()
@@ -49,9 +47,6 @@ def videoRecorder():
 with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
 
     while True:
-
-        # if keyboard & 0xFF == ord('q'):
-        #     break
 
         image = myDrone.get_frame_read().frame
 
@@ -137,21 +132,17 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) a
                         recorder.join()
                         record_state = False
                         print("Recoed Saved")
-                        myDrone.move_down(50)
-                        myDrone.move_right(50)
-                        myDrone.move_back(100)
-                        myDrone.rotate_clockwise(180)
+                        myDrone.move_forward(50)
                         continue
 
-                # 파노라마
+                # 파노라마 (보자기 제스처)
                 elif thumb_finger_state == 1 and index_finger_state == 1 and middle_finger_state == 1 and ring_finger_state == 1 and pinky_finger_state == 1:
 
                     print("Panorama")
 
-                    myDrone.move_up(50)
-                    myDrone.rotate_counter_clockwise(90)
+                    myDrone.rotate_clockwise(180)
 
-                    myDrone.rotate_clockwise(30)
+                    myDrone.rotate_counter_clockwise(60)
                     image = myDrone.get_frame_read().frame
                     image = np.array(image)
                     cv2.imwrite('panorama1.jpg', image)
@@ -181,8 +172,7 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) a
                     cv2.imwrite('panorama5.jpg', image)
                     time.sleep(0.25)
 
-                    myDrone.rotate_clockwise(-60)
-                    myDrone.move_down(50)
+                    myDrone.rotate_counter_clockwise(240)
                     img_names = ['panorama1.jpg', 'panorama2.jpg', 'panorama3.jpg', 'panorama4.jpg', 'panorama5.jpg']
 
                     imgs = []
@@ -212,10 +202,8 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) a
                     recorder = Thread(target=videoRecorder)
                     recorder.start()
                     print("Record Start!")
-                    myDrone.move_up(50)
-                    myDrone.move_left(50)
-                    myDrone.move_forward(100)
-                    myDrone.rotate_counter_clockwise(180)
+
+                    myDrone.move_back(50)
 
                 # 출석 체크
                 if index_finger_state == 0 and middle_finger_state == 0 and ring_finger_state == 0 and pinky_finger_state == 0:
@@ -224,12 +212,15 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) a
                     images = os.listdir('images')  # 폴더에 저장된 이미지 파일의 이름을 리스트로 만듦
                     print(images)
 
+                    myDrone.rotate_clockwise(180)
                     print("3초있다가 사진찍어욧")
                     time.sleep(3)
 
                     image = myDrone.get_frame_read().frame
                     class_image = np.array(image)
                     cv2.imwrite('class_image.jpg', class_image)
+
+                    myDrone.rotate_clockwise(180)
 
                     image_to_be_matched = face_recognition.load_image_file('class_image.jpg')  # 사진에서 얼굴추출하기
                     image_to_be_matched_encoded = face_recognition.face_encodings(image_to_be_matched)[0]  # 로드된 이미지에서 특징 추출하기
@@ -243,8 +234,3 @@ with mp_hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5) a
                         # 찍은 교실 사진에 저장된 학생이 있다면
                         if result[0] == True:
                             print(img_name(image), 'is here')
-
-        # if cv2.waitKey(5) & 0xFF == 27:
-        #     break
-        if cv2.waitKey(1) == ord('q'):
-            break
