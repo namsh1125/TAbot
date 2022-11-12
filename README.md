@@ -1,4 +1,4 @@
-# GCU_Drone_Term_Project
+# Class Helper
 
 ## Description
 
