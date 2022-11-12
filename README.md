@@ -2,7 +2,7 @@
 
 ## Description
 
-This project was conducted from 22.11.02. to 22.11.12. as a Drones and Robotics course in the 2nd semester of the 3rd year of Gachon University.
+This project was conducted from 22.10.12. to 22.11.12. as a Drones and Robotics course in the 2nd semester of the 3rd year of Gachon University.
 
 We wanted to assist the class through this project, and for this, we implemented three functions using an agile method.
 
