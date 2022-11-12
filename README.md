@@ -27,10 +27,11 @@ Nam seung hyeon - namsh1125
 
 .</br>
 ├── IMG -> student image file</br>
-├── main.py</br>
-├── utils.py</br>
+├── License</br>
+├── README.md</br>
 ├── gesture_train.csv</br>
-└── README.md</br>
+├── main.py</br>
+└── utils.py</br>
 
 ## Used tech stack
 
