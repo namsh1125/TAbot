@@ -14,7 +14,7 @@ Through a `fist gesture`, the drone **identifies whether the classmates attend**
 
 The `scissors gesture` will **record the professor's class**
 
-If you want to **stop recording**, you can `add your thumb to the scissor gesture`
+If you want to **stop recording**, `raise your thumb in the scissor gesture`
 
 **Take a panoramic photo** of the classroom through the `paper gesture` and leave a photo of students' attendance.
 
