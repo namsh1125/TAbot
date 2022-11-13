@@ -41,6 +41,6 @@ Nam seung hyeon - namsh1125
 
 <img src="https://img.shields.io/badge/PyCharm 22.1-000000?style=flat-square&logo=PyCharm&logoColor=white"/></a>
 
-## Lisence
+## License
 
 [![License](https://img.shields.io/npm/l/mithril.svg)](https://github.com/namsh1125/GCU_Drone_Term_Project/blob/main/License)
