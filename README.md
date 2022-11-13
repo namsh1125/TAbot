@@ -26,7 +26,7 @@ Nam seung hyeon - namsh1125
 ## Project structure
 
 .</br>
-├── IMG -> student image file</br>
+├── images -> student image file</br>
 ├── License</br>
 ├── README.md</br>
 ├── gesture_train.csv</br>
